@@ -257,6 +257,10 @@ class RecipesDetailView(generics.RetrieveUpdateDestroyAPIView):
         try:
             a_recipe = self.queryset.get(pk=kwargs["pk"])
 
+            serializer = RecipesSerializer()
+            update = serializer.update(a_recipe, request.data)
+            return Response(RecipesSerializer(update).data)
+
         except Recipes.DoesNotExist:
             return Response(
                 data={
@@ -318,12 +322,9 @@ class EditRecipeIngredientsInfo(generics.UpdateAPIView):
     serializer_class = Recipe_IngredientsSerializer
 
     def put(self, request, *args, **kwargs):
-
         recipe_id = kwargs["pk"]
 
         ingredients_list = request.data["recipe_ingredients"]
-
-
 
         # for food in ingredients_list:
         #
@@ -388,7 +389,6 @@ class UploadRecipesImages(generics.UpdateAPIView):
 class GetRecipeImage(APIView):
 
     def post(self, request, format=None):
-
         aws = FileAWS()
 
         image_name = request.data["image_name"]
@@ -403,6 +403,7 @@ class GetRecipeImage(APIView):
                 'message': 'OK',
                 'fileUrl': res['fileUrl'],
             })
+
 
 class GetRecipeImages(generics.UpdateAPIView):
     queryset = Recipes.objects.all()
@@ -433,5 +434,3 @@ class GetRecipeImages(generics.UpdateAPIView):
             'message': 'OK',
             'fileUrls': list_urls,
         })
-
-
