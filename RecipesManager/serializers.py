@@ -44,6 +44,7 @@ class IngredientsSerializer(serializers.ModelSerializer):
     #     return None
 
     def to_internal_value(self, value):
+        #_mutable make data can change
         if type(value['possible_units']) == str:
             _mutable = value._mutable
             value._mutable = True

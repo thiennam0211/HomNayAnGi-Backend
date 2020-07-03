@@ -10,7 +10,7 @@ from rest_framework.views import status, APIView
 from rest_framework.response import Response
 from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
 
-from django.http import JsonResponse
+from django.http import JsonResponse, QueryDict
 
 from .models import Recipes, Ingredients, Recipe_Ingredients
 from .serializers import RecipesSerializer, IngredientsSerializer, Recipe_IngredientsSerializer
@@ -183,6 +183,8 @@ class ListCreateRecipesView(generics.ListCreateAPIView):
 
         serializer = RecipesSerializer(data=request.data)
 
+        print(request.data)
+
         if serializer.is_valid():
             a_recipe = Recipes.objects.create(
                 title=request.data['title'],
@@ -255,11 +257,36 @@ class RecipesDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def put(self, request, *args, **kwargs):
         try:
+            print("Edit recipes")
+            myQuery = request.data.copy()
+
+            print(type(myQuery))
+            print(type(request.data))
+
+            print(myQuery)
+            myDict = dict(myQuery)
+            if isinstance(request.data, QueryDict):
+                print("Querydict nè")
+
+                myDict["title"] = myDict["title"][0]
+                myDict["summary"] = myDict["summary"][0]
+                myDict["dish_types"] = myDict["dish_types"][0]
+                myDict["servings"] = int(myDict["servings"][0])
+                myDict["readyInMinutes"] = int(myDict["readyInMinutes"][0])
+
+                inductions_str = myDict["inductions"][0]
+
+                my_json = json.loads(inductions_str)
+
+                myDict["inductions"] = my_json
+            else:
+                print("dict nè")
+
             a_recipe = self.queryset.get(pk=kwargs["pk"])
 
             serializer = RecipesSerializer()
-            update = serializer.update(a_recipe, request.data)
-            return Response(RecipesSerializer(update).data)
+            update = serializer.update(a_recipe, myDict)
+            return Response(RecipesSerializer(a_recipe).data)
 
         except Recipes.DoesNotExist:
             return Response(
