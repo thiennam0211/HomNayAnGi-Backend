@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_filters',
     'corsheaders',
     'storages',
     'groupmanager.apps.GroupmanagerConfig',
@@ -78,6 +79,7 @@ REST_FRAMEWORK = {
     # 'DEFAULT_AUTHENTICATION_CLASSES': [
     #     'rest_framework_simplejwt.authentication.JWTAuthentication',
     # ],
+
 }
 
 TEMPLATES = [

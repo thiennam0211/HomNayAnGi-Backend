@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import ListIngredientsView, ListCreateIngredientsView, IngredientsDetailView, \
-    ListRecipesView, ListCreateRecipesView, RecipesDetailView, UploadRecipesImages, UploadRecipeIngredientsInfo, GetRecipeImage, GetRecipeImages
+    ListRecipesView, ListCreateRecipesView, RecipesDetailView, UploadRecipesImages, UploadRecipeIngredientsInfo, \
+    GetRecipeImage, GetRecipeImages, RecipesIngredientsView, EditRecipeIngredientsInfo
 
 urlpatterns = [
     path('ingredients/', ListIngredientsView.as_view(), name='ingredients-all-list'),
@@ -11,9 +12,12 @@ urlpatterns = [
     path('create', ListCreateRecipesView.as_view(), name='recipe-create'),
     path('<int:pk>', RecipesDetailView.as_view(), name='recipe-detail'),
     path('<int:pk>/upload-image', UploadRecipesImages.as_view(), name='upload-recipe-image'),
-    path('<int:pk>/upload-ingredients', UploadRecipeIngredientsInfo.as_view(), name='upload-recipe-ingredients'),
     path('get-image', GetRecipeImage.as_view(), name='get-image-recipes'),
     path('<int:pk>/get-images', GetRecipeImages.as_view(), name='get-all-image-url-of-recipes'),
 
+
+    path('recipes-ingredients', RecipesIngredientsView.as_view(), name='recipes-ingredients-get-all'),
+    path('recipes-ingredients/<int:pk>/edit', EditRecipeIngredientsInfo.as_view(), name='edit-recipe-ingredients'),
+    path('<int:pk>/upload-ingredients', UploadRecipeIngredientsInfo.as_view(), name='upload-recipe-ingredients'),
 
 ]

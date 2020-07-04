@@ -1,3 +1,4 @@
+import django_filters
 import unidecode as unidecode
 from django.shortcuts import render
 
@@ -165,7 +166,7 @@ class ListRecipesView(generics.ListAPIView):
     """
     search_fields = ['title']
     filter_fields = ['dish_types', 'servings']
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = [filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend]
     queryset = Recipes.objects.all()
     serializer_class = RecipesSerializer
 
@@ -243,8 +244,9 @@ class RecipesDetailView(generics.RetrieveUpdateDestroyAPIView):
                     )
                 else:
                     a_recipe.images = image_recipe_list
+                    data = RecipesSerializer(a_recipe).data
                     return Response(
-                        RecipesSerializer(a_recipe).data
+                        data=data
                     )
 
         except Recipes.DoesNotExist:
@@ -291,7 +293,7 @@ class RecipesDetailView(generics.RetrieveUpdateDestroyAPIView):
         except Recipes.DoesNotExist:
             return Response(
                 data={
-                    "message": "User with id: {} does not exist".format(kwargs["pk"])
+                    "message": "Recipes with id: {} does not exist".format(kwargs["pk"])
                 },
                 status=status.HTTP_404_NOT_FOUND
             )
@@ -303,7 +305,7 @@ class RecipesDetailView(generics.RetrieveUpdateDestroyAPIView):
         except Recipes.DoesNotExist:
             return Response(
                 data={
-                    "message": "User with id: {} does not exist".format(kwargs["pk"])
+                    "message": "Recipes with id: {} does not exist".format(kwargs["pk"])
                 },
                 status=status.HTTP_404_NOT_FOUND
             )
@@ -347,33 +349,19 @@ class UploadRecipeIngredientsInfo(generics.CreateAPIView):
 class EditRecipeIngredientsInfo(generics.UpdateAPIView):
     queryset = Recipe_Ingredients.objects.all()
     serializer_class = Recipe_IngredientsSerializer
+    filter_fields = ['recipe']
+    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
 
     def put(self, request, *args, **kwargs):
-        recipe_id = kwargs["pk"]
 
-        ingredients_list = request.data["recipe_ingredients"]
+        recipes_id = request.query_params.get("recipe")
 
-        # for food in ingredients_list:
-        #
-        #     food["recipe"] = recipe_id
-        #     print(food)
-        #     serializer = Recipe_IngredientsSerializer(data=food)
-        #
-        #     if serializer.is_valid():
-        #         a_recipe_ingredient = Recipe_Ingredients.objects.create(
-        #             recipe=Recipes.objects.get(pk=recipe_id),
-        #             ingredient=Ingredients.objects.get(pk=food["ingredient"]),
-        #             amount=food["amount"],
-        #             unit=food["unit"],
-        #         )
-        #         ++index
-        #     else:
-        #         return Response(
-        #             data=serializer.errors,
-        #             status=status.HTTP_400_BAD_REQUEST
-        #         )
+        a_recipe_ingre = self.queryset.get(pk=kwargs["pk"])
 
-        return Response(data="Save ok")
+        serializer = Recipe_IngredientsSerializer()
+
+        update = serializer.update(a_recipe_ingre, request.data)
+        return Response(Recipe_IngredientsSerializer(update).data)
 
 
 class UploadRecipesImages(generics.UpdateAPIView):
@@ -461,3 +449,22 @@ class GetRecipeImages(generics.UpdateAPIView):
             'message': 'OK',
             'fileUrls': list_urls,
         })
+
+
+class RecipesIngredientsView(generics.ListAPIView):
+    """
+    GET recipes/
+    GET recipes/
+    """
+    filter_fields = ['recipe', 'unit']
+    filter_backends = [filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend]
+    queryset = Recipe_Ingredients.objects.all()
+    serializer_class = Recipe_IngredientsSerializer
+
+
+
+
+
+
+
+
