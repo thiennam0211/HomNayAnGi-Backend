@@ -140,13 +140,26 @@ CORS_ALLOW_HEADERS = ["*"]
 #     }
 # }
 
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'ohejqsfx',
+#         'USER': 'ohejqsfx',
+#         'PASSWORD': 'V77qplG1DeL8449d957_9LnikdGrBz-a',
+#         'HOST': 'satao.db.elephantsql.com',
+#         'PORT': '5432',
+#     }
+# }
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'ohejqsfx',
-        'USER': 'ohejqsfx',
-        'PASSWORD': 'V77qplG1DeL8449d957_9LnikdGrBz-a',
-        'HOST': 'satao.db.elephantsql.com',
+        'NAME': 'HomNayAnGi',
+        'USER': 'postgres',
+        'PASSWORD': '123456',
+        'HOST': 'localhost',
         'PORT': '5432',
     }
 }

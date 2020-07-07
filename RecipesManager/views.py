@@ -1,5 +1,6 @@
 import django_filters
 import unidecode as unidecode
+from django.db import close_old_connections
 from django.shortcuts import render
 
 # Create your views here.
@@ -167,7 +168,7 @@ class ListRecipesView(generics.ListAPIView):
     search_fields = ['title']
     filter_fields = ['dish_types', 'servings']
     filter_backends = [filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend]
-    queryset = Recipes.objects.all()
+    queryset = Recipes.objects.all().order_by('id')
     serializer_class = RecipesSerializer
 
 
@@ -202,6 +203,7 @@ class ListCreateRecipesView(generics.ListCreateAPIView):
                 status=status.HTTP_201_CREATED
             )
         else:
+            print(serializer.errors)
             return Response(
                 data=serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST
@@ -245,6 +247,7 @@ class RecipesDetailView(generics.RetrieveUpdateDestroyAPIView):
                 else:
                     a_recipe.images = image_recipe_list
                     data = RecipesSerializer(a_recipe).data
+
                     return Response(
                         data=data
                     )
@@ -445,6 +448,7 @@ class GetRecipeImages(generics.UpdateAPIView):
 
         print(list_urls)
 
+
         return JsonResponse({
             'message': 'OK',
             'fileUrls': list_urls,
@@ -458,8 +462,9 @@ class RecipesIngredientsView(generics.ListAPIView):
     """
     filter_fields = ['recipe', 'unit']
     filter_backends = [filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend]
-    queryset = Recipe_Ingredients.objects.all()
+    queryset = Recipe_Ingredients.objects.all().order_by('recipe')
     serializer_class = Recipe_IngredientsSerializer
+
 
 
 

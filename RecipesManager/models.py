@@ -22,10 +22,11 @@ class Recipes(models.Model):
 
 
 class Recipe_Ingredients(models.Model):
-    recipe = models.ForeignKey(Recipes, on_delete=models.CASCADE)
-    ingredient = models.ForeignKey(Ingredients, on_delete=models.PROTECT)
+    recipe = models.ForeignKey(Recipes, on_delete=models.CASCADE,  related_name='recipe')
+    ingredient = models.ForeignKey(Ingredients, on_delete=models.PROTECT,  related_name='ingredient')
     amount = models.FloatField()
     unit = models.CharField(null=True, blank=True, max_length=1024)
 
     class Meta:
         unique_together = [['recipe', 'ingredient']]
+

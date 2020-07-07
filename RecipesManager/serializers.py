@@ -24,6 +24,7 @@ class RecipesSerializer(serializers.ModelSerializer):
                                        min_length=None, max_length=None)
 
         fields = '__all__'
+        depth = 1
 
     def update(self, instance, validated_data):
         instance.title = validated_data.get('title', instance.title)
@@ -45,11 +46,16 @@ class IngredientsSerializer(serializers.ModelSerializer):
 
     def to_internal_value(self, value):
         #_mutable make data can change
-        if type(value['possible_units']) == str:
-            _mutable = value._mutable
-            value._mutable = True
+
+        if isinstance(value, QueryDict):
+            if type(value['possible_units']) == str:
+                _mutable = value._mutable
+                value._mutable = True
+                value['possible_units'] = str_to_arr(value['possible_units'])
+                value._mutable = _mutable
+        else:
             value['possible_units'] = str_to_arr(value['possible_units'])
-            value._mutable = _mutable
+
         return super().to_internal_value(value)
 
     class Meta:
@@ -78,6 +84,8 @@ class Recipe_IngredientsSerializer(serializers.ModelSerializer):
         id = serializers.IntegerField()
         model = Recipe_Ingredients
         # fields = {'recipe', 'ingredient', 'amount', 'unit'}
+        # recipe = serializers.RelatedField(source='Recipes', queryset=Recipes.objects.all())
+        depth = 1
         fields = '__all__'
 
     # def create(self, validated_data):
