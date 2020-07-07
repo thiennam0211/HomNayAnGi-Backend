@@ -4,7 +4,7 @@ autopep8==1.5.2
 boto3==1.13.9
 botocore==1.16.9
 colorama==0.4.3
-Django==3.0.5
+Django==3.0.7
 django-cors-headers==3.4.0
 django-s3direct==1.1.5
 django-storages==1.9.1
