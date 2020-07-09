@@ -375,11 +375,15 @@ class UploadRecipesImages(generics.UpdateAPIView):
     def put(self, request, *args, **kwargs):
         serializer = RecipesSerializer()
 
+        print(request.data)
+
         a_recipe = self.queryset.get(pk=kwargs["pk"])
+        print(str(a_recipe))
 
         aws = FileAWS()
 
         file_list = request.FILES.getlist('images')
+        print("Request images")
 
         image_key_file = unidecode.unidecode(a_recipe.title)
 
