@@ -28,5 +28,6 @@ urlpatterns = [
     path('api/users/', include('usermanager.urls')),
     path('api/group/', include('groupmanager.urls')),
     path('api/recipies/', include('RecipesManager.urls')),
+    path('api/container/', include('FoodContainer.urls')),
     path('api/file/', include('FilesManager.urls')),
 ]

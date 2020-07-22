@@ -2,16 +2,23 @@
 # from django.http import HttpResponse
 
 # Create your views here.
+import django_filters
+from django.contrib.auth.base_user import BaseUserManager
+from django.contrib.auth.hashers import make_password
 from django.http import JsonResponse
 from rest_framework import generics
 from rest_framework import permissions
+from rest_framework import filters
 from rest_framework.response import Response
 from rest_framework.views import status, APIView
 from rest_framework.parsers import FileUploadParser, MultiPartParser
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import Users
 from .decorated import validate_request_data
 from .serializers import UsersSerializers
+
+import requests
 
 import json
 import datetime
@@ -22,6 +29,8 @@ class ListUsersView(generics.ListAPIView):
     """
     GET users/
     """
+    search_fields = ['email']
+    filter_backends = [filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend]
     queryset = Users.objects.all()
     serializer_class = UsersSerializers
 
@@ -38,6 +47,10 @@ class ListCreateUsersView(generics.ListCreateAPIView):
 
     @validate_request_data
     def post(self, request, *args, **kwargs):
+        images = request.data["images"]
+
+        print(images)
+        print(type(images))
 
         serializer = UsersSerializers(data=request.data)
 
@@ -47,24 +60,26 @@ class ListCreateUsersView(generics.ListCreateAPIView):
 
             images = request.data["images"]
 
-            user_key_file = str(request.data["email"]).split('@')
+            if not type(images) == str:
 
-            images.name = user_key_file[0] + "_" + images.name
+                user_key_file = str(request.data["email"]).split('@')
 
-            avatar_up = aws.upload_file(images, 'avatar')
+                images.name = user_key_file[0] + "_" + images.name
 
-            if avatar_up.status_code == status.HTTP_200_OK:
-                print("Up avatar okela")
+                avatar_up = aws.upload_file(images, 'avatar')
 
-                a_user = Users.objects.create(
-                    email=request.data["email"],
-                    password=request.data["password"],
-                    full_name=request.data["full_name"],
-                    display_name=request.data["display_name"],
-                    gender=request.data["gender"],
-                    birthday=request.data["birthday"],
-                    avatar=images
-                )
+                if avatar_up.status_code == status.HTTP_200_OK:
+                    print("Up avatar okela")
+
+                    a_user = Users.objects.create(
+                        email=request.data["email"],
+                        password=request.data["password"],
+                        full_name=request.data["full_name"],
+                        display_name=request.data["display_name"],
+                        gender=request.data["gender"],
+                        birthday=request.data["birthday"],
+                        avatar=images
+                    )
             else:
                 a_user = Users.objects.create(
                     email=request.data["email"],
@@ -72,7 +87,8 @@ class ListCreateUsersView(generics.ListCreateAPIView):
                     full_name=request.data["full_name"],
                     display_name=request.data["display_name"],
                     gender=request.data["gender"],
-                    birthday=request.data["birthday"]
+                    birthday=request.data["birthday"],
+                    avatar='default-user.png'
                 )
 
             return Response(
@@ -305,6 +321,60 @@ class UserForgotPasswordView(generics.UpdateAPIView):
                     },
                     status=status.HTTP_404_NOT_FOUND
                 )
+
+        except Users.DoesNotExist:
+
+            message = "User with email: {} does not exist".format(email)
+
+            return Response(
+                data={
+                    "message": message
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+
+# class googleView(APIView):
+#
+#     def post(self, request):
+#         payload = {'access_token': request.data.get("token")}  # validate the token
+#         r = requests.get('https://www.googleapis.com/oauth2/v2/userinfo', params=payload)
+#         data = json.loads(r.text)
+#
+#         if 'error' in data:
+#             content = {'message': 'wrong google token / this google token is already expired.'}
+#             return Response(content)
+#
+#         # create user if not exist
+#         try:
+#             user = Users.objects.get(email=data['email'])
+#         except Users.DoesNotExist:
+#             user = Users()
+#             user.username = data['email']
+#             # provider random default password
+#             user.password = make_password(BaseUserManager().make_random_password())
+#             user.email = data['email']
+#             user.save()
+#
+#         token = RefreshToken.for_user(user)
+#         # generate token without username & password
+#         response = {}
+#
+#         response['username'] = user.username
+#         response['access_token'] = str(token.access_token)
+#         response['refresh_token'] = str(token)
+#         return Response(response)
+
+class CheckUserExisted(APIView):
+    queryset = Users.objects.all()
+
+    def post(self, request, format=None):
+        try:
+            email = request.data["email"]
+
+            a_user_with_email = self.queryset.get(email = email)
+
+            return Response(UsersSerializers(a_user_with_email).data)
 
         except Users.DoesNotExist:
 

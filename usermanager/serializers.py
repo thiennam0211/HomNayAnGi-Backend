@@ -1,3 +1,4 @@
+from django.http import QueryDict
 from pylint.checkers.spelling import instr
 from rest_framework import serializers
 from .models import Users
@@ -20,7 +21,14 @@ class UsersSerializers(serializers.ModelSerializer):
     #     return value
 
     def to_internal_value(self, value):
-        value['birthday'] = parser.parse(value['birthday']).date()
+        if isinstance(value, QueryDict):
+            if type(value['birthday']) == str:
+                _mutable = value._mutable
+                value._mutable = True
+                value['birthday'] = parser.parse(value['birthday']).date()
+                value._mutable = _mutable
+        else:
+            value['birthday'] = parser.parse(value['birthday']).date()
         return super().to_internal_value(value)
 
     class Meta:

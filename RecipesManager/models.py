@@ -1,6 +1,8 @@
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
+from usermanager import models as userModel
+
 
 # Create your models here.
 
@@ -19,6 +21,7 @@ class Recipes(models.Model):
     images = ArrayField(models.TextField(null=True, blank=True), null=True, blank=True)
     inductions = ArrayField(models.TextField(null=True, blank=True), null=True, blank=True)
     # ingredient = models.ManyToManyField(Ingredients, through='Recipe_Ingredients')
+    author = models.ForeignKey(userModel.Users, on_delete=models.PROTECT, related_name='author')
 
 
 class Recipe_Ingredients(models.Model):
